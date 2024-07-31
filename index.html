@@ -38,6 +38,14 @@
             display: none;
         }
     </style>
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+        var unityInstance;
+        window.onload = function() {
+            unityInstance = UnityLoader.instantiate("unityContainer", "Build/WebBuild.json", {onProgress: UnityProgress});
+        };
+    </script>
 </head>
 <body>
     <div id="unity-container">
@@ -51,72 +59,14 @@
         <div id="unity-warning"></div>
     </div>
     <script>
-        var canvas = document.querySelector("#unity-canvas");
-
-        function unityShowBanner(msg, type) {
-            var warningBanner = document.querySelector("#unity-warning");
-            function updateBannerVisibility() {
-                warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-            }
-            var div = document.createElement('div');
-            div.innerHTML = msg;
-            warningBanner.appendChild(div);
-            if (type == 'error') div.style = 'background: red; padding: 10px;';
-            else {
-                if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-                setTimeout(function() {
-                    warningBanner.removeChild(div);
-                    updateBannerVisibility();
-                }, 5000);
-            }
-            updateBannerVisibility();
+        function resizeUnityContainer() {
+            var mywidth = innerWidth;
+            var myheight = innerHeight;
+            document.getElementById("unityContainer").style.width = mywidth + "px";
+            document.getElementById("unityContainer").style.height = myheight + "px";
         }
-
-        var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/Unity2DFlap.loader.js";
-        var config = {
-            arguments: [],
-            dataUrl: buildUrl + "/Unity2DFlap.data",
-            frameworkUrl: buildUrl + "/Unity2DFlap.framework.js",
-            codeUrl: buildUrl + "/Unity2DFlap.wasm",
-            streamingAssetsUrl: "StreamingAssets",
-            companyName: "TEAMMURICA",
-            productName: "FLOPYTROMP2D",
-            productVersion: "1.0",
-            showBanner: unityShowBanner,
-        };
-
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            var meta = document.createElement('meta');
-            meta.name = 'viewport';
-            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-            document.getElementsByTagName('head')[0].appendChild(meta);
-            document.querySelector("#unity-container").className = "unity-mobile";
-            canvas.className = "unity-mobile";
-        } else {
-            canvas.style.width = "100%";
-            canvas.style.height = "100%";
-        }
-
-        document.querySelector("#unity-loading-bar").style.display = "block";
-
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.onload = () => {
-            createUnityInstance(canvas, config, (progress) => {
-                document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-            }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                // Ensure the game starts without entering fullscreen mode
-                document.body.addEventListener('click', () => {
-                    unityInstance.SetFullscreen(0);
-                });
-            }).catch((message) => {
-                alert(message);
-            });
-        };
-
-        document.body.appendChild(script);
+        window.addEventListener('resize', resizeUnityContainer);
+        resizeUnityContainer();
     </script>
 </body>
 </html>
